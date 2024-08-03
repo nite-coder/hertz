@@ -75,6 +75,7 @@ type Options struct {
 	Tracers                      []interface{}
 	TraceLevel                   interface{}
 	ListenConfig                 *net.ListenConfig
+	Listener                     net.Listener
 	BindConfig                   interface{}
 	ValidateConfig               interface{}
 	CustomBinder                 interface{}

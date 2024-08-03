@@ -70,7 +70,7 @@ func NewTransporter(options *config.Options) network.Transporter {
 		keepAliveTimeout:         options.KeepAliveTimeout,
 		readTimeout:              options.ReadTimeout,
 		writeTimeout:             options.WriteTimeout,
-		listener:                 nil,
+		listener:                 options.Listener,
 		eventLoop:                nil,
 		listenConfig:             options.ListenConfig,
 		OnAccept:                 options.OnAccept,
@@ -82,10 +82,13 @@ func NewTransporter(options *config.Options) network.Transporter {
 // or the transport shutdowns
 func (t *transporter) ListenAndServe(onReq network.OnData) (err error) {
 	network.UnlinkUdsFile(t.network, t.addr) //nolint:errcheck
-	if t.listenConfig != nil {
-		t.listener, err = t.listenConfig.Listen(context.Background(), t.network, t.addr)
-	} else {
-		t.listener, err = net.Listen(t.network, t.addr)
+
+	if t.listener == nil {
+		if t.listenConfig != nil {
+			t.listener, err = t.listenConfig.Listen(context.Background(), t.network, t.addr)
+		} else {
+			t.listener, err = net.Listen(t.network, t.addr)
+		}
 	}
 
 	if err != nil {

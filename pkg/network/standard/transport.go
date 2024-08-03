@@ -53,11 +53,15 @@ type transport struct {
 func (t *transport) serve() (err error) {
 	network.UnlinkUdsFile(t.network, t.addr) //nolint:errcheck
 	t.lock.Lock()
-	if t.listenConfig != nil {
-		t.ln, err = t.listenConfig.Listen(context.Background(), t.network, t.addr)
-	} else {
-		t.ln, err = net.Listen(t.network, t.addr)
+
+	if t.ln == nil {
+		if t.listenConfig != nil {
+			t.ln, err = t.listenConfig.Listen(context.Background(), t.network, t.addr)
+		} else {
+			t.ln, err = net.Listen(t.network, t.addr)
+		}
 	}
+
 	t.lock.Unlock()
 	if err != nil {
 		return err
@@ -125,5 +129,6 @@ func NewTransporter(options *config.Options) network.Transporter {
 		listenConfig:     options.ListenConfig,
 		OnAccept:         options.OnAccept,
 		OnConnect:        options.OnConnect,
+		ln:               options.Listener,
 	}
 }
