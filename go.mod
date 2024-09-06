@@ -4,19 +4,19 @@ go 1.17
 
 require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2
-	github.com/bytedance/gopkg v0.0.0-20240507064146-197ded923ae3
-	github.com/bytedance/mockey v1.2.10
-	github.com/bytedance/sonic v1.11.9
+	github.com/bytedance/gopkg v0.1.0
+	github.com/bytedance/mockey v1.2.12
+	github.com/bytedance/sonic v1.12.0
 	github.com/cloudwego/netpoll v0.6.2
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10
+	golang.org/x/sys v0.24.0
 	google.golang.org/protobuf v1.27.1
 )
 
 require (
-	github.com/bytedance/sonic/loader v0.1.1 // indirect
+	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
