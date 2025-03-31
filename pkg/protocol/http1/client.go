@@ -544,11 +544,13 @@ func (c *HostClient) doNonNilReqResp(req *protocol.Request, resp *protocol.Respo
 	if (reqTimeout > 0 && reqTimeout < dialTimeout) || dialTimeout == 0 {
 		dialTimeout = reqTimeout
 	}
+	start := time.Now()
 	cc, inPool, err := c.acquireConn(dialTimeout)
 	// if getting connection error, fast fail
 	if err != nil {
 		return false, err
 	}
+	req.SetConnAcquisitionTime(time.Since(start))
 	conn := cc.c
 
 	usingProxy := false

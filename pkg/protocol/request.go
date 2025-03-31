@@ -51,6 +51,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cloudwego/hertz/internal/bytesconv"
 	"github.com/cloudwego/hertz/internal/bytestr"
@@ -110,7 +111,8 @@ type Request struct {
 	multipartFields []*MultipartField
 
 	// Request level options, service discovery options etc.
-	options *config.RequestOptions
+	options             *config.RequestOptions
+	connAcquisitionTime time.Duration
 }
 
 type requestBodyWriter struct {
@@ -828,6 +830,14 @@ func (req *Request) ResetWithoutConn() {
 	req.CloseBodyStream()
 
 	req.options = nil
+}
+
+func (req *Request) ConnAcquisitionTime() time.Duration {
+	return req.connAcquisitionTime
+}
+
+func (req *Request) SetConnAcquisitionTime(duration time.Duration) {
+	req.connAcquisitionTime = duration
 }
 
 // AcquireRequest returns an empty Request instance from request pool.
