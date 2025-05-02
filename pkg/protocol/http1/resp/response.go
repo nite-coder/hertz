@@ -167,6 +167,7 @@ var clientRespStreamPool = sync.Pool{
 
 func convertClientRespStream(bs io.Reader, fn func(shouldClose bool) error) *clientRespStream {
 	clientStream := clientRespStreamPool.Get().(*clientRespStream)
+	runtime.SetFinalizer(clientStream, nil)
 	clientStream.r = bs
 	clientStream.closeCallback = fn
 	runtime.SetFinalizer(clientStream, (*clientRespStream).Close)
