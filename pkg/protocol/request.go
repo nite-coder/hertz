@@ -466,7 +466,7 @@ func (req *Request) SetFormData(data map[string]string) {
 		req.postArgs.Add(k, v)
 	}
 	req.parsedPostArgs = true
-	req.Header.SetContentTypeBytes(bytestr.StrPostArgsContentType)
+	req.Header.SetContentTypeBytes(bytestr.MIMEPostForm)
 }
 
 // SetFormDataFromValues sets x-www-form-urlencoded params from url values.
@@ -477,7 +477,7 @@ func (req *Request) SetFormDataFromValues(data url.Values) {
 		}
 	}
 	req.parsedPostArgs = true
-	req.Header.SetContentTypeBytes(bytestr.StrPostArgsContentType)
+	req.Header.SetContentTypeBytes(bytestr.MIMEPostForm)
 }
 
 // SetFile sets single file field name and its path for multipart upload.
@@ -640,7 +640,7 @@ func (req *Request) IsBodyStream() bool {
 
 func (req *Request) BodyStream() io.Reader {
 	if req.bodyStream == nil {
-		req.bodyStream = NoBody
+		return NoBody
 	}
 	return req.bodyStream
 }
@@ -686,8 +686,7 @@ func (req *Request) parsePostArgs() {
 		return
 	}
 	req.parsedPostArgs = true
-
-	if !bytes.HasPrefix(req.Header.ContentType(), bytestr.StrPostArgsContentType) {
+	if !bytes.HasPrefix(req.Header.ContentType(), bytestr.MIMEPostForm) {
 		return
 	}
 	req.postArgs.ParseBytes(req.Body())
