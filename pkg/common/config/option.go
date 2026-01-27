@@ -78,7 +78,6 @@ type Options struct {
 	TraceLevel                   interface{}
 	Listener                     net.Listener
 	ListenConfig                 *net.ListenConfig
-	Listener                     net.Listener
 	BindConfig                   interface{}
 	CustomBinder                 interface{}
 	CustomValidator              interface{}

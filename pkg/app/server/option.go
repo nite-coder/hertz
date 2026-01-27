@@ -467,9 +467,3 @@ func WithSenseClientDisconnection(b bool) config.Option {
 		o.SenseClientDisconnection = b
 	}}
 }
-
-func WithListener(listener net.Listener) config.Option {
-	return config.Option{F: func(o *config.Options) {
-		o.Listener = listener
-	}}
-}
