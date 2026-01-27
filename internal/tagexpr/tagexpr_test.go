@@ -15,6 +15,8 @@
 package tagexpr_test
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -22,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/internal/tagexpr"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func assertEqual(t *testing.T, v1, v2 interface{}, msgs ...interface{}) {
@@ -851,5 +854,81 @@ func TestIssue5(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestHertzIssue1410(t *testing.T) {
+	type HelloReq struct {
+		Meta *structpb.Struct `protobuf:"bytes,2,opt,name=meta,proto3" form:"meta" json:"meta,omitempty"`
+	}
+	x := &HelloReq{}
+	if err := json.Unmarshal([]byte(`{"meta": {"test": "value"}}`), x); err != nil {
+		t.Fatal(err)
+	}
+	te := tagexpr.New("test").MustRun(x)
+	if err := te.Range(func(eh *tagexpr.ExprHandler) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFakeBool(t *testing.T) {
+	// Numeric types - zero values should be false, non-zero should be true
+	tests := []struct {
+		input    interface{}
+		expected bool
+	}{
+		// Float types
+		{float64(0), false},
+		{float64(3.14), true},
+		{float32(0), false},
+		{float32(2.5), true},
+
+		// Integer types
+		{int(0), false}, {int(42), true},
+		{int8(0), false}, {int8(127), true},
+		{int16(0), false}, {int16(32767), true},
+		{int32(0), false}, {int32(2147483647), true},
+		{int64(0), false}, {int64(9223372036854775807), true},
+
+		// Unsigned integer types
+		{uint(0), false}, {uint(1), true},
+		{uint8(0), false}, {uint8(255), true},
+		{uint16(0), false}, {uint16(65535), true},
+		{uint32(0), false}, {uint32(4294967295), true},
+		{uint64(0), false}, {uint64(18446744073709551615), true},
+
+		// String type
+		{"", false},
+		{"hello", true},
+
+		// Boolean type
+		{true, true},
+		{false, false},
+
+		// Nil and error types
+		{nil, false},
+		{errors.New("test"), false},
+
+		// Slice of interfaces - all elements must be truthy for true
+		{[]interface{}{}, true},                 // empty slice -> true
+		{[]interface{}{1, "hello", true}, true}, // all truthy -> true
+		{[]interface{}{1, "", true}, false},     // one falsy -> false
+		{[]interface{}{0, "", false}, false},    // all falsy -> false
+		{[]interface{}{nil, nil}, false},        // nil values are falsy -> false
+
+		// Unsupported types should return false
+		{struct{}{}, false},
+		{new(int), false},
+		{make(chan int), false},
+		{func() {}, false},
+		{map[string]int{}, false},
+		{[3]int{1, 2, 3}, false},
+	}
+
+	for _, tt := range tests {
+		result := tagexpr.FakeBool(tt.input)
+		if result != tt.expected {
+			t.Errorf("FakeBool(%v) = %v; want %v", tt.input, result, tt.expected)
+		}
 	}
 }

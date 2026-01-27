@@ -88,6 +88,18 @@ func (t *transporter) Listener() net.Listener {
 func (t *transporter) ListenAndServe(onReq network.OnData) (err error) {
 	network.UnlinkUdsFile(t.network, t.addr) //nolint:errcheck
 
+	t.mu.Lock()
+	if t.ln == nil {
+		if t.listenConfig != nil {
+			t.ln, err = t.listenConfig.Listen(context.Background(), t.network, t.addr)
+		} else {
+			t.ln, err = net.Listen(t.network, t.addr)
+		}
+		if err != nil {
+			t.mu.Unlock()
+			panic("create netpoll listener fail: " + err.Error())
+		}
+	}
 	ln := t.ln
 	if ln == nil {
 		t.mu.Lock()
@@ -98,10 +110,6 @@ func (t *transporter) ListenAndServe(onReq network.OnData) (err error) {
 		}
 		ln = t.ln
 		t.mu.Unlock()
-	}
-
-	if err != nil {
-		panic("create netpoll listener fail: " + err.Error())
 	}
 
 	// Initialize custom option for EventLoop
